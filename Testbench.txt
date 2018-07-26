@@ -1,0 +1,89 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+ 
+ENTITY bcd_tb IS
+END bcd_tb;
+ 
+ARCHITECTURE behavior OF bcd_tb IS
+ 
+	-- Component Declaration for the Unit Under Test (UUT)
+ 
+	COMPONENT BCD
+	PORT(
+     	pre_set : IN  std_logic;
+     	cin_b : IN  std_logic;
+     	reset : IN  std_logic;
+     	updown : IN  std_logic;
+     	clk : IN  std_logic;
+     	P : IN  std_logic_vector(3 downto 0);
+     	cout_b : OUT  std_logic;
+     	Q : OUT  std_logic_vector(3 downto 0)
+    	);
+	END COMPONENT;
+    
+
+   --Inputs
+   signal pre_set : std_logic := '0';
+   signal cin_b : std_logic := '0';
+   signal reset : std_logic := '0';
+   signal updown : std_logic := '0';
+   signal clk : std_logic := '0';
+   signal P : std_logic_vector(3 downto 0);
+
+ 	--Outputs
+   signal cout_b : std_logic;
+   signal Q : std_logic_vector(3 downto 0);
+ 
+BEGIN
+ 
+	-- Instantiate the Unit Under Test (UUT)
+   uut: BCD PORT MAP (
+      	pre_set => pre_set,
+      	cin_b => cin_b,
+      	reset => reset,
+      	updown => updown,
+      	clk => clk,
+      	P => P,
+      	cout_b => cout_b,
+      	Q => Q
+    	);
+
+P_clock: process is
+	begin
+    	clk <= '1', '0' after 10ns;
+    	wait for 20ns;
+	end process;
+
+P_P: process is
+   	 begin
+   		 P <= "1111", "1010" after 220ns, "1100" after 500ns, "1110" after 800ns;
+   		 wait for 1000ns;
+   	 end process;
+
+    
+P_set: process is
+	begin
+    	pre_set <= '0', '1' after 200ns, '0' after 220ns;
+    	wait for 250ns;
+	end process;
+
+P_count: process is
+	begin
+    	updown <= '1', '0' after 400ns;
+    	wait for 800ns;
+	end process;
+    
+P_cin: process is
+	begin
+    	cin_b <= '0', '1' after 150ns, '0' after 180ns;
+    	wait for 250ns;
+	end process;
+    
+P_reset: process is
+	begin
+    	reset <= '0', '1' after 200ns, '0' after 220ns, '1' after 800ns, '0' after 810ns;
+    	wait for 900ns;
+	end process;
+    
+
+END;

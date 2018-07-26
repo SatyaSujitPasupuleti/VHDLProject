@@ -1,0 +1,57 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use ieee.numeric_std.all;
+
+entity BCD is
+	Port ( pre_set : in  STD_LOGIC;
+       	cin_b : in  STD_LOGIC;
+       	reset : in  STD_LOGIC;
+       	updown : in  STD_LOGIC;
+       	clk : in  STD_LOGIC;
+       	P : in  STD_LOGIC_VECTOR (3 DOWNTO 0);
+       	cout_b : out  STD_LOGIC;
+       	Q : out  STD_LOGIC_VECTOR (3 DOWNTO 0));
+end BCD;
+
+architecture Behavioral of BCD is
+signal counter : unsigned (3 downto 0):= (others => '0');
+begin
+Q <= std_logic_vector(counter);
+BCD_proc: process (clk, reset)
+	begin
+    	if reset = '1' then                	--WHEN RESET IS 1, EVERYTHING RESETS
+   			 counter <= (others=>'0');   		   --however updown, cin, clock, p value(?) unaffected
+    	elsif pre_set = '1' then                	--WHEN PRESET IS 1 Q, BECOMES P VALUE
+   			 counter <= unsigned(P(3 downto 0));
+   	   else
+        	if (rising_edge(clk)) then
+            	if cin_b = '1' then            	--WHEN CIN IS 1, NO COUNTING
+                	counter <= counter;
+            	else
+   					   if updown = '1' then        	--COUNTING UP
+                    	cout_b <= NOT (counter(0) AND counter(3) AND (NOT cin_b));            	--COUT LOW ONLY WHEN Q0 AND Q4 AND CIN LOW
+   							 if counter = 9 then
+                        	counter <= (others => '0');
+                    	elsif counter = 11 then
+                        	counter <= "0110";
+                    	elsif counter = 13 then
+                        	counter <= "0100";
+                    	elsif counter = 15 then
+                        	counter <= "0010";
+                    	else
+                        	counter <= counter + 1;
+                    	end if;
+                	else                            	--COUNTING DOWN
+                    	cout_b <= NOT (counter(0) AND counter(1) AND counter(2) AND counter(3) AND cin_b);	--COUT LOW ONLY WHEN ALL Q AND CIN LOW
+   							 if counter = 0 then     	-- hits 0 goes to 9
+                        	counter <= "1001";
+                    	else
+                        	counter <= counter - 1;
+                    	end if;
+                	end if;
+            	end if;
+        	end if;
+    	end if;   	 
+end process;
+
+end Behavioral;
